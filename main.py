@@ -1,6 +1,8 @@
 import pandas as pd
 import requests
 import json
+import psycopg2
+from sqlalchemy import create_engine
 
 
 #PASO 1: CONECTARSE A LA API
@@ -51,6 +53,36 @@ filtered_data = [d if d is not None else {} for d in data]
 df_expand_priceRanges = pd.DataFrame(filtered_data)
 df_final = pd.concat([df_final ,df_expand_priceRanges], axis=1)
 
+#borramos las filas que puedan estar duplicadas
+df_final = df_final.drop_duplicates()
+
 
 #SEGUNDO PUNTO DE CONTROL
 print('la tabla se ha creado con éxito')
+
+
+#Paso 3: importar los datos a redshift
+# Establecer la conexión a Redshift
+host = ' http://data-engineer-cluster.cyhh5bfevlmn.us-east-1.redshift.amazonaws.com/'
+port = '5439'
+dbname = 'data-engineer-database'
+user = 'danielarbrot_coderhouse'
+password = 'xxxx'
+
+# Construir la cadena de conexión
+conn_str = f'postgresql://{user}:{password}@{host}:{port}/{dbname}'
+
+# Crear un motor de SQLAlchemy
+engine = create_engine(conn_str)
+
+# Nombre de la tabla en Redshift
+table_name = 'daniela_brot.ticket_master_conciertos'
+
+# Trasladar el DataFrame a Redshift dond ese pisará
+df_final.to_sql(table_name, engine, index=False, if_exists='replace')
+
+#En caso de querer volcarlos últimos el DataFrame en la tabla en Redshift
+#df_final.to_sql(table_name, engine, index=False, if_exists='append')
+
+
+print("DataFrame trasladado exitosamente a Redshift.")
