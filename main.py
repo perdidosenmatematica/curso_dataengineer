@@ -6,12 +6,14 @@ import sqlalchemy as sa
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.engine.url import URL
-#from dotenv import load_dotenv
+from dotenv import load_dotenv
 import os
+
+load_dotenv()
 
 #PASO 1: CONECTARSE A LA API
 
-API_KEY = "R2G7fFI8rrBZJefdtU18G69CH4sMhEff"
+API_KEY = os.getenv("API_KEY")
 
 #url para ver todos los eventos
 #url = "https://app.ticketmaster.com/discovery/v2/events.json?apikey=" + API_KEY
@@ -83,18 +85,18 @@ def cargar_tabla_redshift(df, table_name):
         # Establecer la conexión a Redshift - Cadena sqlalchemy URL
         url = URL.create(
         drivername='redshift+redshift_connector', 
-        host='data-engineer-cluster.cyhh5bfevlmn.us-east-1.redshift.amazonaws.com',
-        port=5439, 
-        database='data-engineer-database',
-        username='danielarbrot_coderhouse',
-        password = 'xxxxxx'
+        host=os.getenv("HOST"),
+        port=os.getenv("PORT"), 
+        database=os.getenv("DBNAME"),
+        username=os.getenv("USER"),
+        password = os.getenv("PASSWORD")
         )
 
         engine = sa.create_engine(url)
         df.to_sql(table_name, engine, index=False, if_exists='replace')
         return f'Se cargó la tabla {table_name} exitosamente'
     except SQLAlchemyError as e:
-        # Mensaje de error
+        # Mensaje de error+
         return f"Error al cargar el DataFrame en Redshift: {str(e)}"
 
 tabla = 'ticket_master_conciertos'
