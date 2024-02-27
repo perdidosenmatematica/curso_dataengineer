@@ -2,8 +2,12 @@ import pandas as pd
 import requests
 import json
 import psycopg2
+import sqlalchemy as sa
 from sqlalchemy import create_engine
-
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.engine.url import URL
+#from dotenv import load_dotenv
+import os
 
 #PASO 1: CONECTARSE A LA API
 
@@ -58,31 +62,40 @@ df_final = df_final.drop_duplicates()
 
 
 #SEGUNDO PUNTO DE CONTROL
-print('la tabla se ha creado con éxito')
+print('La tabla se ha creado con éxito')
 
 
 #Paso 3: importar los datos a redshift
-# Establecer la conexión a Redshift
-host = ' http://data-engineer-cluster.cyhh5bfevlmn.us-east-1.redshift.amazonaws.com/'
-port = '5439'
-dbname = 'data-engineer-database'
-user = 'danielarbrot_coderhouse'
-password = 'xxxx'
+#creo una función.
+def cargar_tabla_redshift(df, table_name):
+    """
+    Carga un DataFrame en una tabla de Redshift.
 
-# Construir la cadena de conexión
-conn_str = f'postgresql://{user}:{password}@{host}:{port}/{dbname}'
+    Args:
+    - df: DataFrame que se va a cargar en Redshift.
+    - table_name: Nombre de la tabla en Redshift.
+    - conn_str: Cadena de conexión a la base de datos de Redshift.
 
-# Crear un motor de SQLAlchemy
-engine = create_engine(conn_str)
+    Returns:
+    - str: Mensaje indicando el resultado de la operación.
+    """
+    try:
+        # Establecer la conexión a Redshift - Cadena sqlalchemy URL
+        url = URL.create(
+        drivername='redshift+redshift_connector', 
+        host='data-engineer-cluster.cyhh5bfevlmn.us-east-1.redshift.amazonaws.com',
+        port=5439, 
+        database='data-engineer-database',
+        username='danielarbrot_coderhouse',
+        password = 'xxxxxx'
+        )
 
-# Nombre de la tabla en Redshift
-table_name = 'daniela_brot.ticket_master_conciertos'
+        engine = sa.create_engine(url)
+        df.to_sql(table_name, engine, index=False, if_exists='replace')
+        return f'Se cargó la tabla {table_name} exitosamente'
+    except SQLAlchemyError as e:
+        # Mensaje de error
+        return f"Error al cargar el DataFrame en Redshift: {str(e)}"
 
-# Trasladar el DataFrame a Redshift dond ese pisará
-df_final.to_sql(table_name, engine, index=False, if_exists='replace')
-
-#En caso de querer volcarlos últimos el DataFrame en la tabla en Redshift
-#df_final.to_sql(table_name, engine, index=False, if_exists='append')
-
-
-print("DataFrame trasladado exitosamente a Redshift.")
+tabla = 'ticket_master_conciertos'
+cargar_tabla_redshift(df_final, tabla)
