@@ -1,5 +1,6 @@
 ## Curso de data engineer
 Es un curso que de 3 meses que he realizado de forma virtual en coderhouse.
+El mismo constó de 4 entregas. 
 
 ### La primera entraga consistió en:
 - Generar un script (formato .py o .ipynb) que funcione como prototipo (MVP) de un ETL para el proyecto final
@@ -18,3 +19,9 @@ En mi caso elegí conectarme a la API de ticketmaster para extraer los concierto
 ### La tercera entraga consistió en:
 - Crear un script liviano y funcional que pueda ser utilizado en cualquier Sistema operativo y por cualquier usuario. 
 - Dockerizar un script para hacerlo funcional en cualquier sistema operativo. 
+
+### La cuarta entraga consistió en:
+Crear un pipeline que extraiga datos de una API pública de forma constante combinándolos con información extraída de una base de datos (mínimamente estas 2 fuentes de datos, pero pueden utilizarse hasta 4).
+Colocar los datos extraídos en un Data Warehouse. 
+Automatizar el proceso que extraerá, transformará y cargará datos cuantitativos (ejemplo estos son: valores de acciones de la bolsa, temperatura de ciudades seleccionadas, valor de una moneda comparado con el dólar, casos de covid). 
+Automatizar el proceso para lanzar alertas (2 máximo) por e-mail en caso de que un valor sobrepase un límite configurado en el código.
